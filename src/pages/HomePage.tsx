@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { SearchBar } from '../components/SearchBar';
 import { ErrorAlert } from '../components/ErrorAlert';
 import { searchMovies } from '../api/movieApi';
-import { Movie } from '../types/movie';
+// import { Movie } from '../types/movie';
 import { IntroSection } from './IntroSection';
 import { motion } from "framer-motion";
 import backgroundImage from '../assets/photo-1512790182412-b19e6d62bc39.avif';

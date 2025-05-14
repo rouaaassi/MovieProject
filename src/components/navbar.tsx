@@ -3,7 +3,7 @@ import { Box, Button, Tooltip, tooltipClasses, Typography } from "@mui/material"
 import HomeIcon from '@mui/icons-material/Home';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+// import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { motion } from "framer-motion";
 
 export const Navbar = () => (
