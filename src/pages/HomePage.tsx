@@ -1,89 +1,69 @@
-import { useState } from "react"; // React hook to manage component state
-import { searchMovies } from "../api/movieApi"; // Function to call movie search API
-import { Movie } from "../types/movie"; // Movie type definition
-import { useNavigate } from "react-router-dom"; // Hook for programmatic navigation
-import { motion } from "framer-motion"; // Library for animations
-import backgroundImage from '../assets/photo-1512790182412-b19e6d62bc39.avif'; // Background image
-
-// Import custom components used in this page
-import { ErrorAlert } from "../components/ErrorAlert"; // Error message alert component
-import { IntroSection } from "./IntroSection"; // Initial introduction section
-import { MovieListSection } from "./MovieListSection"; // Section to display movies list
-import { SearchBarSection } from "./SearchBarSection"; // Search bar component
+import { useState } from 'react';
+import { Box } from '@mui/material';
+import { SearchBar } from '../components/SearchBar';
+import { ErrorAlert } from '../components/ErrorAlert';
+import { searchMovies } from '../api/movieApi';
+import { Movie } from '../types/movie';
+import { IntroSection } from './IntroSection';
+import { motion } from "framer-motion";
+import backgroundImage from '../assets/photo-1512790182412-b19e6d62bc39.avif';
+import { useNavigate } from "react-router-dom";
+import { useSearch } from '../App';
 
 // HomePage component - Main page of the application
 export const HomePage = () => {
-  // State to hold list of fetched movies
-  const [movies, setMovies] = useState<Movie[]>([]);
-  
-  // State to hold error message if fetching fails or no results found
   const [error, setError] = useState<string | null>(null);
-
-  // Hook to navigate to other routes (e.g., contact page)
   const navigate = useNavigate();
+  const { setSearchResults, setSearchQuery, setIsLoading } = useSearch();
 
-  // Function to handle searching movies by query
   const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      return;
+    }
+
+    setError(null);
+    setIsLoading(true);
+    setSearchQuery(query);
+
     try {
-      // Call the API to search for movies with the given query
       const results = await searchMovies(query);
-      
-      // If no movies found, set an error message
-      if (results.length === 0) {
-        setError("No movies found. Please try a different search term.");
-      } else {
-        setError(null); // Clear any previous errors
-      }
-      
-      // Update the movies state with fetched results
-      setMovies(results);
-    } catch (error) {
-      // Set an error message if API call fails
-      setError("Failed to fetch movies. Please check your internet connection.");
+      setSearchResults(results);
+      navigate('/search');
+    } catch (err) {
+      setError('Failed to fetch movies. Please try again.');
+      console.error('Search error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Function to handle "Contact Us" button click
   const handleContact = () => {
-    navigate("/contact"); // Navigate to the contact page
-  };
-
-  // Animation configuration for fade-in effect using framer-motion
-  const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 2 } }, // 2-second fade-in animation
+    navigate('/contact');
   };
 
   return (
-    // Main container with full screen height and background image
-    <motion.div
-      className="h-[100vh] w-full relative flex flex-col text-white"
-      style={{
-        backgroundImage: `url(${backgroundImage})`, // Set background image
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-      initial="hidden" // Initial animation state
-      animate="visible" // Final animation state
-      variants={fadeIn} // Apply fade-in animation
-    >
-      {/* Main content container with higher z-index to be above background */}
-      <div className="relative z-10 flex flex-col flex-grow mt-[20px]">
-        
-        {/* Display error alert if an error exists */}
-        <ErrorAlert error={error} onClose={() => setError(null)} />
-        
-        {/* Conditionally render MovieListSection if movies exist, otherwise show IntroSection */}
-        {movies.length > 0 ? (
-          <MovieListSection movies={movies} /> // List of movies
-        ) : (
-          <IntroSection onContactClick={handleContact} /> // Intro section with contact button
-        )}
-
-        {/* Search bar component to perform movie search */}
-        <SearchBarSection onSearch={handleSearch} />
-      </div>
-    </motion.div>
+    <Box>
+      <motion.div
+        className="h-[100vh] w-full relative flex flex-col text-white"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          minHeight: '100vh',
+          width: '100%',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/30"></div>
+        <div className="relative z-10 flex flex-col flex-grow mt-[20px] min-h-screen">
+          <IntroSection onContactClick={handleContact} />
+          <SearchBar onSearch={handleSearch} />
+          {error && <ErrorAlert error={error} onClose={() => setError(null)} />}
+        </div>
+      </motion.div>
+    </Box>
   );
 };

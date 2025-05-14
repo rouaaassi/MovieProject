@@ -1,31 +1,31 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Movie } from "../types/movie";
-import { useFavorites } from "../contexts/FavoritesContext";
-import { Button, Typography, Snackbar, Alert } from "@mui/material";
+import { Typography, Snackbar, Alert, Box, Card, CardMedia, CardContent, CardActions, Button } from "@mui/material";
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import StarIcon from '@mui/icons-material/Star';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { motion } from "framer-motion";
 
-export const MovieCard: React.FC<{ movie: Movie }> = ({ movie }) => {
-  const { favorites, addFavorite, removeFavorite } = useFavorites();
-  const isFavorite = favorites.some((fav) => fav.id === movie.id);
+interface MovieCardProps {
+  movie: Movie;
+  onFavoriteAction?: (movie: Movie) => void;
+  isFavorite?: boolean;
+}
 
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteAction, isFavorite = false }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning">("success");
+  const location = useLocation();
+  const isFavoritesPage = location.pathname === '/favorites';
 
-  const handleAddFavorite = () => {
-    addFavorite(movie);
-    setSnackbarMessage("Film added successfully");
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
-  };
-
-  const handleRemoveFavorite = () => {
-    removeFavorite(movie.id);
-    setSnackbarMessage("Film removed successfully");
-    setSnackbarSeverity("error");
-    setSnackbarOpen(true);
+  const handleFavoriteAction = () => {
+    if (onFavoriteAction) {
+      onFavoriteAction(movie);
+      setSnackbarMessage(isFavorite ? "Movie removed from favorites" : "Movie added to favorites");
+      setSnackbarSeverity(isFavorite ? "warning" : "success");
+      setSnackbarOpen(true);
+    }
   };
 
   const handleCloseSnackbar = () => {
@@ -33,51 +33,93 @@ export const MovieCard: React.FC<{ movie: Movie }> = ({ movie }) => {
   };
 
   return (
-    <div className="border rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col pt-4">
-      <Link to={`/movie/${movie.id}`} className="flex-grow no-underline">
-        <img
-          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-          alt={movie.title}
-          className="w-full h-80 object-cover"
-        />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card 
+        sx={{ 
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          '&:hover': {
+            transform: 'scale(1.02)',
+            transition: 'transform 0.3s ease-in-out'
+          }
+        }}
+      >
+        <Link to={`/movie/${movie.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <CardMedia
+            component="img"
+            height="400"
+            image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            alt={movie.title}
+            sx={{ 
+              objectFit: 'cover',
+              '&:hover': {
+                opacity: 0.9
+              }
+            }}
+          />
+        </Link>
 
-        <div className="flex items-center gap-2 justify-start p-2">
-          <VideoLibraryIcon sx={{ color: 'red' }} />
-          <Typography
-            variant="body2"
-            component="h2"
-            sx={{ color: 'black', fontWeight: 'bold' }}
-            className="text-lg"
-          >
-            {movie.title}
-          </Typography>
-          <StarIcon sx={{ color: 'gold' }} />
-        </div>
-      </Link>
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <VideoLibraryIcon sx={{ color: 'error.main' }} />
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{ 
+                fontWeight: 'bold',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+              }}
+            >
+              {movie.title}
+            </Typography>
+          </Box>
+        </CardContent>
 
-      <div className="p-2">
-        {isFavorite ? (
-          <Button
-            variant="contained"
-            color="error"
-            fullWidth
-            onClick={handleRemoveFavorite}
-          >
-            Remove
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            color="success"
-            fullWidth
-            onClick={handleAddFavorite}
-          >
-            Add
-          </Button>
-        )}
-      </div>
+        <CardActions sx={{ justifyContent: 'center', gap: 1 }}>
+          {isFavoritesPage ? (
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleFavoriteAction}
+              startIcon={<DeleteIcon />}
+              sx={{ 
+                flex: 1,
+                textTransform: 'none',
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: 'error.dark'
+                }
+              }}
+            >
+              Remove from Favorites
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color={isFavorite ? "error" : "success"}
+              onClick={handleFavoriteAction}
+              sx={{ 
+                flex: 1,
+                textTransform: 'none',
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: isFavorite ? 'error.dark' : 'success.dark'
+                }
+              }}
+            >
+              {isFavorite ? "Remove" : "Add to Favorites"}
+            </Button>
+          )}
+        </CardActions>
+      </Card>
 
-      {/* Snackbar component */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -87,11 +129,15 @@ export const MovieCard: React.FC<{ movie: Movie }> = ({ movie }) => {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbarSeverity}
-          sx={{ width: '100%' }}
+          sx={{ 
+            width: '100%',
+            backgroundColor: snackbarSeverity === 'success' ? 'success.main' : 'warning.main',
+            color: 'white'
+          }}
         >
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div>
+    </motion.div>
   );
 };

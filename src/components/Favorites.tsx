@@ -1,14 +1,31 @@
-import { Box, Typography, TextField, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import { Box, Typography, TextField, MenuItem, Select, InputLabel, FormControl, Snackbar, Alert, Grid } from "@mui/material";
 import { useFavorites } from "../contexts/FavoritesContext";
 import { MovieCard } from "./MovieCard";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import backgroundImage from '../assets/photo-1512790182412-b19e6d62bc39.avif';
+import { Movie } from "../types/movie";
 
 export const Favorites = () => {
-  const { favorites } = useFavorites();
+  const { favorites, removeFavorite } = useFavorites();
 
   const [filterType, setFilterType] = useState<string>("title");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [sortType, setSortType] = useState<string>("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning">("success");
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleFavoriteAction = (movie: Movie) => {
+    removeFavorite(movie.id);
+    setSnackbarMessage("Movie removed from favorites");
+    setSnackbarSeverity("warning");
+    setSnackbarOpen(true);
+  };
 
   const filteredFavorites = favorites
     .filter((movie) => {
@@ -34,88 +51,197 @@ export const Favorites = () => {
     });
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        padding: 5,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
-        background: "radial-gradient(circle at top left, rgb(54, 28, 28), #000000)",
-        minHeight: '100vh'
+    <motion.div
+      className="min-h-screen w-full relative flex flex-col text-white"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        backgroundColor: '#000000',
       }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
     >
-      <Typography variant="h4" fontWeight="bold" textAlign="center" color="white">
-        Your Favorite Films
-      </Typography>
-
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-        <FormControl sx={{ minWidth: 150 }} size="small">
-          <InputLabel sx={{ color: "white" }}>Filter by</InputLabel>
-          <Select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            label="Filter by"
-            sx={{ color: "white", borderColor: "white" }}
-          >
-            <MenuItem value="title">Name</MenuItem>
-            <MenuItem value="release_date">Release Date</MenuItem>
-            <MenuItem value="rating">Rating</MenuItem>
-          </Select>
-        </FormControl>
-
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder={`Search by ${filterType === "title" ? "name" : filterType === "release_date" ? "release date" : "rating"}`}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{
-            input: { color: "white" },
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": { borderColor: "white" },
-              "&:hover fieldset": { borderColor: "gray" },
-              "&.Mui-focused fieldset": { borderColor: "white" },
-            },
-            minWidth: 250
-          }}
-        />
-
-        {/* ترتيب */}
-        <FormControl sx={{ minWidth: 180 }} size="small">
-          <InputLabel sx={{ color: "white" }}>Sort by</InputLabel>
-          <Select
-            value={sortType}
-            onChange={(e) => setSortType(e.target.value)}
-            label="Sort by"
-            sx={{ color: "white", borderColor: "white" }}
-          >
-            <MenuItem value="">None</MenuItem>
-            <MenuItem value="title_asc">Name (A-Z)</MenuItem>
-            <MenuItem value="title_desc">Name (Z-A)</MenuItem>
-            <MenuItem value="date_newest">Newest Release</MenuItem>
-            <MenuItem value="date_oldest">Oldest Release</MenuItem>
-            <MenuItem value="rating_highest">Highest Rating</MenuItem>
-            <MenuItem value="rating_lowest">Lowest Rating</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
       <Box
         sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          width: '100%',
+          padding: 5,
+          display: 'flex',
+          flexDirection: 'column',
           gap: 4,
+          minHeight: '100vh',
+          position: 'relative',
+          zIndex: 1
         }}
       >
-        {filteredFavorites.length > 0 ? (
-          filteredFavorites.map((movie) => <MovieCard key={movie.id} movie={movie} />)
-        ) : (
-          <Typography variant="body1" textAlign="center" sx={{ gridColumn: '1 / -1', color: "white" }}>
-            No favorite movies found.
-          </Typography>
-        )}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 2, 
+            flexWrap: 'wrap',
+            background: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(10px)',
+            padding: 3,
+            borderRadius: 2,
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            mt: 8
+          }}
+        >
+          <FormControl sx={{ minWidth: 150 }} size="small">
+            <InputLabel sx={{ color: "white" }}>Filter by</InputLabel>
+            <Select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              label="Filter by"
+              sx={{
+                color: "white",
+                borderColor: "white",
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: 'white',
+                }
+              }}
+            >
+              <MenuItem value="title">Name</MenuItem>
+              <MenuItem value="release_date">Release Date</MenuItem>
+              <MenuItem value="rating">Rating</MenuItem>
+            </Select>
+          </FormControl>
+
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder={`Search by ${filterType === "title" ? "name" : filterType === "release_date" ? "release date" : "rating"}`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              minWidth: 250,
+              '& .MuiOutlinedInput-root': {
+                color: 'white',
+                '& fieldset': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover fieldset': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'white',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: 'rgba(255, 255, 255, 0.7)',
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.5)',
+                opacity: 1,
+              }
+            }}
+          />
+
+          <FormControl sx={{ minWidth: 150 }} size="small">
+            <InputLabel sx={{ color: "white" }}>Sort by</InputLabel>
+            <Select
+              value={sortType}
+              onChange={(e) => setSortType(e.target.value)}
+              label="Sort by"
+              sx={{
+                color: "white",
+                borderColor: "white",
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'white',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: 'white',
+                }
+              }}
+            >
+              <MenuItem value="">None</MenuItem>
+              <MenuItem value="title_asc">Name (A-Z)</MenuItem>
+              <MenuItem value="title_desc">Name (Z-A)</MenuItem>
+              <MenuItem value="date_newest">Newest Release</MenuItem>
+              <MenuItem value="date_oldest">Oldest Release</MenuItem>
+              <MenuItem value="rating_highest">Highest Rating</MenuItem>
+              <MenuItem value="rating_lowest">Lowest Rating</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Typography 
+          variant="h4" 
+          fontWeight="bold" 
+          textAlign="center" 
+          sx={{ 
+            color: 'white',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            mb: 4
+          }}
+        >
+          Your Favorite Films
+        </Typography>
+
+        <Grid container spacing={3} justifyContent="center">
+          {filteredFavorites.length > 0 ? (
+            filteredFavorites.map((movie) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={movie.id}>
+                <MovieCard 
+                  movie={movie} 
+                  onFavoriteAction={handleFavoriteAction}
+                  isFavorite={true}
+                />
+              </Grid>
+            ))
+          ) : (
+            <Typography 
+              variant="h6" 
+              textAlign="center" 
+              sx={{ 
+                color: 'white',
+                opacity: 0.7,
+                mt: 4
+              }}
+            >
+              No favorite movies found
+            </Typography>
+          )}
+        </Grid>
       </Box>
-    </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbarSeverity}
+          sx={{ 
+            width: '100%',
+            backgroundColor: snackbarSeverity === 'success' ? 'success.main' : 'warning.main',
+            color: 'white'
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </motion.div>
   );
 };
