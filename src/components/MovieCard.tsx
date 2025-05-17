@@ -24,7 +24,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, onFavoriteAction, i
       onFavoriteAction(movie);
       setSnackbarMessage(isFavorite ? "Movie removed from favorites" : "Movie added to favorites");
       setSnackbarSeverity(isFavorite ? "warning" : "success");
-      setSnackbarOpen(true);
+    setSnackbarOpen(true);
     }
   };
 

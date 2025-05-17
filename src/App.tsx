@@ -75,11 +75,11 @@ const App = () => {
     <Router>
       <FavoritesProvider>
         <SearchProvider>
-          <AppContent />
+      <AppContent />
         </SearchProvider>
       </FavoritesProvider>
     </Router>
-  );
+);
 };
 
 export default App;
