@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import {
   Modal,
   Box,
@@ -11,6 +12,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { motion } from 'framer-motion';
+
 interface ContactModalProps {
   open: boolean;
   onClose: () => void;
@@ -39,7 +41,7 @@ export const ContactModal = ({ open, onClose }: ContactModalProps) => {
         message: message,
       };
 
-      await email.send(
+      await emailjs.send(
         'YOUR_SERVICE_ID', // Replace with your service ID
         'YOUR_TEMPLATE_ID', // Replace with your template ID
         templateParams,
