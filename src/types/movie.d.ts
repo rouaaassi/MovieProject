@@ -10,4 +10,10 @@ export interface Movie {
     results: Movie[];
   }
   
-  export interface MovieDetailResponse extends Movie {}
+  export interface MovieDetailResponse extends Movie {
+    runtime: number;
+    genres: { id: number; name: string }[];
+    production_companies: { id: number; name: string; logo_path: string | null }[];
+    budget: number;
+    revenue: number;
+  }
