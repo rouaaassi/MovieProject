@@ -11,8 +11,6 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { motion } from 'framer-motion';
-import emailjs from '@emailjs/browser';
-
 interface ContactModalProps {
   open: boolean;
   onClose: () => void;
@@ -41,7 +39,7 @@ export const ContactModal = ({ open, onClose }: ContactModalProps) => {
         message: message,
       };
 
-      await emailjs.send(
+      await email.send(
         'YOUR_SERVICE_ID', // Replace with your service ID
         'YOUR_TEMPLATE_ID', // Replace with your template ID
         templateParams,
